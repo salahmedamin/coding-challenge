@@ -1,0 +1,68 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model employee {
+  id         Int                       @id @default(autoincrement())
+  name       String
+  email      String                    @unique
+  actions    action[]
+  time_slots employees_to_time_slots[]
+}
+
+model time_slot {
+  id        Int                       @id @default(autoincrement())
+  start     DateTime                  @unique
+  end       DateTime
+  employees employees_to_time_slots[]
+}
+
+model employees_to_time_slots {
+  id        Int        @id @default(autoincrement())
+  employee  employee?  @relation(fields: [emp_id], references: [id])
+  emp_id    Int?
+  time_slot time_slot? @relation(fields: [ts_id], references: [id])
+  ts_id     Int?
+  title     String
+
+  @@unique([emp_id, ts_id])
+}
+
+enum action_types {
+  ADD
+  DELETE
+  UPDATE
+}
+
+model action {
+  id         Int          @id @default(autoincrement())
+  supervisor supervisor?  @relation(fields: [sup_id], references: [id])
+  sup_id     Int?
+  employee   employee?    @relation(fields: [emp_id], references: [id])
+  emp_id     Int?
+  type       action_types
+}
+
+model supervisor {
+  id       Int      @id @default(autoincrement())
+  email    String
+  password String
+  tokens   token[]
+  actions  action[]
+}
+
+model token {
+  id        Int         @id @default(autoincrement())
+  owner     supervisor? @relation(fields: [sup_id], references: [id])
+  sup_id    Int?
+  token     String
+  isExpired Boolean
+}

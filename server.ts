@@ -1,13 +1,9 @@
-import { default as express, Request, Response, Application } from "express";
 import dotenv from "dotenv";
+import { Application, default as express } from "express";
+import { APIRouter } from "./routes/api";
 
 dotenv.config();
 const app: Application = express();
-app.get("/", (req: Request, res: Response) => {
-  res.send({
-    message: "Hello World !",
-  });
-});
-app.listen(process.env.PORT || 3000, () =>
-  console.log(`Listening on ${process.env.PORT}`)
-);
+app.use(express.json());
+app.use("/api", APIRouter);
+export default app;
